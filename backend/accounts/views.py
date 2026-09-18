@@ -1,9 +1,8 @@
-from django.contrib.auth import get_user_model
-from .permissions import IsAdminUser
-
-from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import (
@@ -11,11 +10,10 @@ from .serializers import (
     CustomerLoginSerializer,
     AdminRegisterSerializer,
     AdminLoginSerializer,
+    UserProfileSerializer,
+    ChangePasswordSerializer,
 )
-
-# pyrefly: ignore [missing-import]
-from rest_framework_simplejwt.tokens import RefreshToken
-
+from .permissions import IsAdminUser
 
 User = get_user_model()
 
@@ -34,13 +32,12 @@ class CustomerRegistrationView(APIView):
 
             return Response(
                 {
-                    "status": 201,
-                    "message": "User created successfully",
+                    "message": "User registered successfully.",
                     "user": {
                         "id": user.id,
                         "username": user.username,
                         "email": user.email,
-                    },
+                    }
                 },
                 status=status.HTTP_201_CREATED
             )
@@ -67,15 +64,16 @@ class CustomerLoginView(APIView):
 
             return Response(
                 {
-                    "status": 200,
-                    "message": "User logged in successfully",
+                    "message": "Login successful.",
                     "access": str(refresh.access_token),
                     "refresh": str(refresh),
+                    "is_admin": bool(user.is_superuser or user.is_staff),
                     "user": {
                         "id": user.id,
                         "username": user.username,
                         "email": user.email,
-                    },
+                        "is_admin": bool(user.is_superuser or user.is_staff),
+                    }
                 },
                 status=status.HTTP_200_OK
             )
@@ -91,26 +89,57 @@ class CustomerProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-
+        serializer = UserProfileSerializer(request.user)
         return Response(
             {
                 "status": 200,
-                "message": "User profile fetched successfully",
-                "user": {
-                    "id": request.user.id,
-                    "username": request.user.username,
-                    "email": request.user.email,
-                },
+                "message": "Profile fetched successfully",
+                "profile": serializer.data,
             },
             status=status.HTTP_200_OK
         )
+
+    def put(self, request):
+        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "status": 200,
+                    "message": "Profile updated successfully!",
+                    "profile": serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangePasswordView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            if not user.check_password(serializer.validated_data["old_password"]):
+                return Response(
+                    {"old_password": ["Incorrect current password."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.set_password(serializer.validated_data["new_password"])
+            user.save()
+            return Response(
+                {"status": 200, "message": "Password changed successfully!"},
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AdminRegistrationView(APIView):
 
     def post(self, request):
 
-        # Check whether an admin already exists
         if User.objects.filter(is_superuser=True).exists():
 
             return Response(
@@ -170,6 +199,7 @@ class AdminLoginView(APIView):
                         "id": user.id,
                         "username": user.username,
                         "email": user.email,
+                        "is_admin": True,
                     },
                 },
                 status=status.HTTP_200_OK
@@ -180,18 +210,39 @@ class AdminLoginView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+
 class AdminDashboardView(APIView):
-    permission_classes=[IsAdminUser]
-    def get(self,request):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
         return Response(
             {
-                "status":200,
-                "message":"Admin dashboard fetched successfully",
-                "admin":{
-                    "id":request.user.id,
-                    "username":request.user.username,
-                    "email":request.user.email,
+                "status": 200,
+                "message": "Admin dashboard fetched successfully",
+                "admin": {
+                    "id": request.user.id,
+                    "username": request.user.username,
+                    "email": request.user.email,
                 },
             },
             status=status.HTTP_200_OK
         )
+
+
+class AdminUserListView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        users = User.objects.all().order_by('-id')
+        data = [
+            {
+                "id": u.id,
+                "username": u.username,
+                "email": u.email,
+                "is_superuser": u.is_superuser,
+                "is_active": u.is_active,
+                "date_joined": u.date_joined,
+            }
+            for u in users
+        ]
+        return Response({"status": 200, "users": data}, status=status.HTTP_200_OK)

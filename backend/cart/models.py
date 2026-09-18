@@ -41,6 +41,14 @@ class CartItem(models.Model):
         related_name="cart_items"
     )
 
+    variant = models.ForeignKey(
+        'products.ProductVariant',
+        on_delete=models.CASCADE,
+        related_name="cart_items",
+        null=True,
+        blank=True
+    )
+
     quantity = models.PositiveIntegerField(
         default=1
     )
@@ -48,10 +56,11 @@ class CartItem(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["cart", "product"],
-                name="unique_cart_product"
+                fields=["cart", "product", "variant"],
+                name="unique_cart_product_variant"
             )
         ]
 
     def __str__(self):
-        return f"{self.product.name} x {self.quantity}"
+        v_name = f" ({self.variant.name})" if self.variant else ""
+        return f"{self.product.name}{v_name} x {self.quantity}"

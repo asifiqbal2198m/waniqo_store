@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from .models import Cart, CartItem
+from products.serializers import ProductVariantSerializer
 
 
 class AddToCartSerializer(serializers.Serializer):
 
     product_id = serializers.IntegerField()
+    variant_id = serializers.IntegerField(required=False, allow_null=True)
 
     quantity = serializers.IntegerField(
         min_value=1
@@ -25,13 +27,12 @@ class CartItemSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
-    price = serializers.DecimalField(
-        source="product.price",
-        max_digits=10,
-        decimal_places=2,
+    variant_details = ProductVariantSerializer(
+        source="variant",
         read_only=True
     )
 
+    price = serializers.SerializerMethodField()
     item_total = serializers.SerializerMethodField()
 
     class Meta:
@@ -40,14 +41,21 @@ class CartItemSerializer(serializers.ModelSerializer):
             "id",
             "product",
             "product_name",
+            "variant",
+            "variant_details",
             "price",
             "quantity",
             "item_total",
         ]
 
-    def get_item_total(self, obj):
+    def get_price(self, obj):
+        if obj.variant and obj.variant.price_override is not None:
+            return obj.variant.price_override
+        return obj.product.price
 
-        return obj.product.price * obj.quantity
+    def get_item_total(self, obj):
+        price = self.get_price(obj)
+        return price * obj.quantity
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -70,10 +78,8 @@ class CartSerializer(serializers.ModelSerializer):
         ]
 
     def get_subtotal(self, obj):
-
-        total = sum(
-            item.product.price * item.quantity
-            for item in obj.items.all()
-        )
-
+        total = 0
+        for item in obj.items.all():
+            price = item.variant.price_override if (item.variant and item.variant.price_override is not None) else item.product.price
+            total += price * item.quantity
         return total

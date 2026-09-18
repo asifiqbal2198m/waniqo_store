@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from accounts.permissions import IsCustomerUser
 
 from .models import Cart, CartItem
 from .serializers import (
@@ -10,12 +11,12 @@ from .serializers import (
     UpdateCartItemSerializer
 )
 
-from products.models import Product
+from products.models import Product, ProductVariant
 
 
 class AddToCartView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCustomerUser]
 
     def post(self, request):
 
@@ -31,6 +32,7 @@ class AddToCartView(APIView):
             )
 
         product_id = serializer.validated_data["product_id"]
+        variant_id = serializer.validated_data.get("variant_id")
         quantity = serializer.validated_data["quantity"]
 
         try:
@@ -49,7 +51,26 @@ class AddToCartView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if quantity > product.stock:
+        variant = None
+        if variant_id:
+            try:
+                variant = ProductVariant.objects.get(
+                    id=variant_id,
+                    product=product,
+                    is_active=True
+                )
+            except ProductVariant.DoesNotExist:
+                return Response(
+                    {
+                        "status": 404,
+                        "message": "Selected product variant not found."
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+        available_stock = variant.stock if variant else product.stock
+
+        if quantity > available_stock:
 
             return Response(
                 {
@@ -66,6 +87,7 @@ class AddToCartView(APIView):
         cart_item, item_created = CartItem.objects.get_or_create(
             cart=cart,
             product=product,
+            variant=variant,
             defaults={
                 "quantity": quantity
             }
@@ -75,7 +97,7 @@ class AddToCartView(APIView):
 
             new_quantity = cart_item.quantity + quantity
 
-            if new_quantity > product.stock:
+            if new_quantity > available_stock:
 
                 return Response(
                     {
@@ -88,6 +110,8 @@ class AddToCartView(APIView):
             cart_item.quantity = new_quantity
             cart_item.save()
 
+        effective_price = variant.effective_price if variant else product.price
+
         return Response(
             {
                 "status": 200,
@@ -96,8 +120,10 @@ class AddToCartView(APIView):
                     "id": cart_item.id,
                     "product": product.id,
                     "product_name": product.name,
-                    "price": str(product.price),
-                    "quantity": cart_item.quantity
+                    "variant": variant.id if variant else None,
+                    "variant_name": variant.name if variant else None,
+                    "price": str(effective_price),
+                    "quantity": cart_item.quantity,
                 }
             },
             status=status.HTTP_200_OK
@@ -106,7 +132,7 @@ class AddToCartView(APIView):
 
 class ViewCartView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCustomerUser]
 
     def get(self, request):
 
@@ -128,7 +154,7 @@ class ViewCartView(APIView):
 
 class UpdateCartItemView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCustomerUser]
 
     def put(self, request, item_id):
 
@@ -189,9 +215,10 @@ class UpdateCartItemView(APIView):
             status=status.HTTP_200_OK
         )
 
+
 class DeleteCartItemView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCustomerUser]
 
     def delete(self, request, item_id):
 
