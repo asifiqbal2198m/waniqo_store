@@ -21,26 +21,29 @@ User = get_user_model()
 class CustomerRegistrationView(APIView):
 
     def post(self, request):
-
         serializer = CustomerRegisterSerializer(
             data=request.data
         )
 
         if serializer.is_valid():
-
-            user = serializer.save()
-
-            return Response(
-                {
-                    "message": "User registered successfully.",
-                    "user": {
-                        "id": user.id,
-                        "username": user.username,
-                        "email": user.email,
-                    }
-                },
-                status=status.HTTP_201_CREATED
-            )
+            try:
+                user = serializer.save()
+                return Response(
+                    {
+                        "message": "User registered successfully.",
+                        "user": {
+                            "id": user.id,
+                            "username": user.username,
+                            "email": user.email,
+                        }
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+            except Exception as err:
+                return Response(
+                    {"detail": f"Registration error: {str(err)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         return Response(
             serializer.errors,

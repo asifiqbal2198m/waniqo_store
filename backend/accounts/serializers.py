@@ -14,14 +14,24 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
-            raise serializers.ValidationError("Passwords do not match")
+            raise serializers.ValidationError({"password": "Passwords do not match."})
+
+        email = attrs.get("email", "").strip()
+        username = attrs.get("username", "").strip()
+
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError({"email": "An account with this email address already exists. Please sign in instead."})
+
+        if User.objects.filter(username__iexact=username).exists():
+            raise serializers.ValidationError({"username": "This username is already taken. Please choose another username."})
+
         return attrs
 
     def create(self, validated_data):
         validated_data.pop("password2")
         return User.objects.create_user(
-            username=validated_data["username"],
-            email=validated_data["email"],
+            username=validated_data["username"].strip(),
+            email=validated_data["email"].strip().lower(),
             password=validated_data["password"],
         )
 
