@@ -2,7 +2,13 @@ import axios from "axios";
 
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_BASE_URL;
-  if (envUrl && envUrl.trim()) {
+  if (
+    envUrl &&
+    envUrl.trim() &&
+    !envUrl.includes("your-backend-name") &&
+    !envUrl.includes("your-backend") &&
+    !envUrl.includes("your-app-name")
+  ) {
     let url = envUrl.trim();
     if (!url.endsWith("/")) url += "/";
     return url;
