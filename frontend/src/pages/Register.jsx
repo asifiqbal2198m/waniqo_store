@@ -54,10 +54,24 @@ function Register() {
       console.error("Register error:", err.response?.data || err.message);
       const data = err.response?.data;
       if (data && typeof data === "object") {
-        const messages = Object.entries(data)
-          .map(([field, message]) => `${field}: ${Array.isArray(message) ? message.join(", ") : message}`)
-          .join(" | ");
-        setError(messages);
+        if (data.detail) {
+          setError(String(data.detail));
+        } else if (data.message) {
+          setError(String(data.message));
+        } else if (data.non_field_errors) {
+          setError(Array.isArray(data.non_field_errors) ? data.non_field_errors.join(", ") : String(data.non_field_errors));
+        } else {
+          const messages = Object.entries(data)
+            .map(([field, message]) => {
+              const label = field.charAt(0).toUpperCase() + field.slice(1);
+              const msg = Array.isArray(message) ? message.join(", ") : String(message);
+              return `${label}: ${msg}`;
+            })
+            .join(" • ");
+          setError(messages || "Registration failed. Please check form details.");
+        }
+      } else if (err.message) {
+        setError(`Unable to connect to server: ${err.message}. Please check your backend connection.`);
       } else {
         setError("Registration failed. Please check form details.");
       }
