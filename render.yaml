@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: waniqo
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        value: django-insecure-^y!-e$*7!r1=)0x7$5!03(-y43s$w-2!3t(=%l_2)9!)m(-=n+
