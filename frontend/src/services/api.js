@@ -7,7 +7,8 @@ const getApiBaseUrl = () => {
     envUrl.trim() &&
     !envUrl.includes("your-backend-name") &&
     !envUrl.includes("your-backend") &&
-    !envUrl.includes("your-app-name")
+    !envUrl.includes("your-app-name") &&
+    !envUrl.includes("waniqo-store-1.onrender.com")
   ) {
     let url = envUrl.trim();
     if (!url.endsWith("/")) url += "/";
