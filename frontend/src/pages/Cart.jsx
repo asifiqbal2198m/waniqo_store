@@ -117,7 +117,11 @@ function Cart() {
         const { razorpay_order_id, amount, key_id } = res.data;
 
         // Check if using demo placeholder key vs real Razorpay dashboard key
-        const isDemoKey = !key_id || key_id.endsWith('_demo') || key_id === 'rzp_test_waniqo_store_demo';
+        const isDemoKey =
+          !key_id ||
+          key_id.endsWith('_demo') ||
+          key_id === 'rzp_test_waniqo_store_demo' ||
+          (razorpay_order_id && razorpay_order_id.startsWith('order_test_'));
 
         const methodLabel = 'Razorpay Secure Online Payment';
 

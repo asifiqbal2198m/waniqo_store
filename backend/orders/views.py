@@ -486,6 +486,7 @@ class CreateRazorpayOrderView(APIView):
         except Exception:
             import time
             rzp_order_id = f"order_test_{int(time.time())}"
+            key_id = "rzp_test_waniqo_store_demo"
 
         return Response(
             {
