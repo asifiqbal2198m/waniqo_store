@@ -30,6 +30,8 @@ function AdminDashboard() {
 
   // Edit Product Modal State
   const [editingProduct, setEditingProduct] = useState(null);
+  const [editImageFile, setEditImageFile] = useState(null);
+  const [editImagePreview, setEditImagePreview] = useState(null);
 
   // Process Return Modal State
   const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
@@ -270,6 +272,20 @@ function AdminDashboard() {
     }
   };
 
+  const handleOpenEditModal = (product) => {
+    setEditingProduct({ ...product });
+    setEditImageFile(null);
+    setEditImagePreview(product.image ? getImageUrl(product.image) : null);
+  };
+
+  const handleEditFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setEditImageFile(file);
+      setEditImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSaveProductEdit = async (e) => {
     e.preventDefault();
     if (!editingProduct) return;
@@ -281,12 +297,18 @@ function AdminDashboard() {
       formData.append('price', parseFloat(editingProduct.price));
       formData.append('stock', parseInt(editingProduct.stock));
 
+      if (editImageFile) {
+        formData.append('image', editImageFile);
+      }
+
       await api.put(`products/admin/${editingProduct.id}/update/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       setMsg(`Product "${editingProduct.name}" updated successfully!`);
       setEditingProduct(null);
+      setEditImageFile(null);
+      setEditImagePreview(null);
       setTimeout(() => setMsg(''), 3000);
       fetchData();
     } catch (err) {
@@ -607,7 +629,7 @@ function AdminDashboard() {
                       Variants ({p.variants?.length || 0}) 👕
                     </button>
                     <button
-                      onClick={() => setEditingProduct(p)}
+                      onClick={() => handleOpenEditModal(p)}
                       className="text-xs font-bold text-indigo-600 hover:text-indigo-700 px-2.5 py-1 bg-indigo-50 rounded-xl border border-indigo-200"
                     >
                       Edit
@@ -904,6 +926,33 @@ function AdminDashboard() {
                   onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
                 />
+              </div>
+
+              {/* Product Image Field & File Picker */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Product Image 📁</label>
+                <div className="flex items-center gap-3">
+                  {editImagePreview ? (
+                    <img
+                      src={editImagePreview}
+                      alt="Preview"
+                      className="w-14 h-14 object-cover rounded-xl border border-slate-200 bg-slate-50 flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400 text-[10px] font-semibold flex-shrink-0">
+                      No img
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditFileChange}
+                      className="w-full text-xs text-slate-700 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">Select a new image file to replace the current image.</p>
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-2 pt-2">

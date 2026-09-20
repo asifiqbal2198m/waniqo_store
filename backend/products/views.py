@@ -204,6 +204,7 @@ class AdminProductUpdateView(APIView):
         serializer = ProductSerializer(
             product,
             data=request.data,
+            partial=True,
             context={'request': request}
         )
         if serializer.is_valid():
