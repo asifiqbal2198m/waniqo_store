@@ -84,6 +84,10 @@ function SearchAutocomplete({ onSelectProduct }) {
               <img
                 src={getImageUrl(item.image)}
                 alt={item.name}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80";
+                }}
                 className="w-10 h-10 object-cover rounded-lg bg-slate-100 flex-shrink-0"
               />
               <div className="flex-1 min-w-0">

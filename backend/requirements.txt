@@ -9,3 +9,5 @@ whitenoise
 python-dotenv
 razorpay
 Pillow
+cloudinary
+django-cloudinary-storage
