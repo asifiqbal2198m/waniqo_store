@@ -19,7 +19,7 @@ const getApiBaseUrl = () => {
     window.location.hostname !== "localhost" &&
     window.location.hostname !== "127.0.0.1"
   ) {
-    return "https://waniqo-store-1.onrender.com/api/";
+    return "https://waniqo.onrender.com/api/";
   }
 
   return "http://127.0.0.1:8000/api/";
