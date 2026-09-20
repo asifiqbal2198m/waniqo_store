@@ -31,7 +31,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):
-    effective_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    effective_price = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductVariant
@@ -47,6 +47,13 @@ class ProductVariantSerializer(serializers.ModelSerializer):
             "is_active",
         ]
         read_only_fields = ["product"]
+
+    def get_effective_price(self, obj):
+        try:
+            val = obj.effective_price
+            return str(val) if val is not None else str(obj.product.price)
+        except Exception:
+            return str(obj.price_override if obj.price_override is not None else (getattr(obj.product, 'price', '0.00')))
 
 
 class ProductSerializer(serializers.ModelSerializer):

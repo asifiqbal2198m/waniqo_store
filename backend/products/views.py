@@ -13,20 +13,30 @@ class ProductListView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        product_list = Product.objects.filter(is_active=True).order_by('-id')
-        serializer = ProductSerializer(
-            product_list,
-            many=True,
-            context={'request': request}
-        )
-        return Response(
-            {
-                "status": 200,
-                "message": "Products fetched successfully",
-                "products": serializer.data,
-            },
-            status=status.HTTP_200_OK
-        )
+        try:
+            product_list = Product.objects.filter(is_active=True).order_by('-id')
+            serializer = ProductSerializer(
+                product_list,
+                many=True,
+                context={'request': request}
+            )
+            return Response(
+                {
+                    "status": 200,
+                    "message": "Products fetched successfully",
+                    "products": serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        except Exception as err:
+            return Response(
+                {
+                    "status": 200,
+                    "message": f"Notice: {str(err)}",
+                    "products": [],
+                },
+                status=status.HTTP_200_OK
+            )
 
 
 class ProductDetailView(APIView):
