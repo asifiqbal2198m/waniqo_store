@@ -166,5 +166,5 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Razorpay Test Gateway Settings
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_waniqo_store_demo")
-RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "waniqo_store_demo_secret_123")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_Te9ifJHNmTndui")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "HO5TKeNKjBT7QaQ8ctJt0IaC")
