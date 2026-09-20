@@ -158,7 +158,18 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://waniqo-store.vercel.app",
+    "https://waniqo-store-1.onrender.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+    r"^https://.*\.onrender\.com$",
+]
 CSRF_TRUSTED_ORIGINS = [
+    "https://waniqo-store.vercel.app",
     "https://*.vercel.app",
     "https://*.onrender.com",
     "http://localhost:5173",
