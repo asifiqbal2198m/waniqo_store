@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api, { getMediaUrl as getImageUrl } from '../services/api';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const HERO_SLIDES = [
   {

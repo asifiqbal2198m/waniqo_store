@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import api, { getMediaUrl as getImageUrl } from "../services/api";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import SearchAutocomplete from "../components/SearchAutocomplete";
 
 function Products() {
   const { addToCart } = useCart();

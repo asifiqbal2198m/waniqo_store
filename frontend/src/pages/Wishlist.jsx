@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api, { getMediaUrl as getImageUrl } from '../services/api';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 function Wishlist() {
   const { addToCart } = useCart();
