@@ -1,14 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-
-const getImageUrl = (image) => {
-  if (!image) return 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80';
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  return `http://127.0.0.1:8000${image}`;
-};
+import api, { getMediaUrl as getImageUrl } from '../services/api';
 
 function Wishlist() {
   const { addToCart } = useCart();

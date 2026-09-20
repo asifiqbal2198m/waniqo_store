@@ -26,7 +26,14 @@ const getApiBaseUrl = () => {
   return "http://127.0.0.1:8000/api/";
 };
 
-const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = getApiBaseUrl();
+
+export const getMediaUrl = (imagePath) => {
+  if (!imagePath) return 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+  const baseUrl = API_BASE_URL.replace(/\/api\/?$/, '');
+  return `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
 
 const api = axios.create({
   baseURL: API_BASE_URL,
