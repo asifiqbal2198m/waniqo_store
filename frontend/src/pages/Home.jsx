@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api, { getMediaUrl as getImageUrl } from '../services/api';
+import api, { getMediaUrl as getImageUrl, getProductFallbackImage } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -240,13 +240,13 @@ const Home = () => {
               >
                 <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
                   <img
-                    src={getImageUrl(product.image)}
+                    src={getImageUrl(product.image, product.name)}
                     alt={product.name}
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80";
+                      e.target.src = getProductFallbackImage(product.name);
                     }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

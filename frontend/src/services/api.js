@@ -28,17 +28,43 @@ const getApiBaseUrl = () => {
 
 export const API_BASE_URL = getApiBaseUrl();
 
-export const getMediaUrl = (imagePath) => {
-  if (!imagePath) return 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80';
+export const getProductFallbackImage = (productName = '') => {
+  const name = String(productName || '').toLowerCase();
+  if (name.includes('laptop') || name.includes('macbook') || name.includes('hp') || name.includes('dell') || name.includes('computer')) {
+    return 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('phone') || name.includes('mobile') || name.includes('iphone') || name.includes('samsung') || name.includes('android')) {
+    return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('watch') || name.includes('smartwatch') || name.includes('band')) {
+    return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('headphone') || name.includes('audio') || name.includes('earphone') || name.includes('speaker') || name.includes('sound')) {
+    return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('cloth') || name.includes('shirt') || name.includes('shoe') || name.includes('fashion') || name.includes('wear')) {
+    return 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('camera') || name.includes('polaroid') || name.includes('photo')) {
+    return 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800&auto=format&fit=crop&q=80';
+  }
+  return 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&auto=format&fit=crop&q=80';
+};
+
+export const getMediaUrl = (imagePath, productName = '') => {
+  if (!imagePath) return getProductFallbackImage(productName);
 
   const baseUrl = API_BASE_URL.replace(/\/api\/?$/, '');
 
-  if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000')) {
-    return imagePath.replace(/^https?:\/\/(127\.0\.0\.1|localhost):8000/, baseUrl);
+  if (typeof imagePath === 'string') {
+    if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000')) {
+      return imagePath.replace(/^https?:\/\/(127\.0\.0\.1|localhost):8000/, baseUrl);
+    }
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+    return `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
   }
 
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-  return `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+  return getProductFallbackImage(productName);
 };
 
 const api = axios.create({

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api, { getMediaUrl as getImageUrl } from "../services/api";
+import api, { getMediaUrl as getImageUrl, getProductFallbackImage } from "../services/api";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import SearchAutocomplete from "../components/SearchAutocomplete";
@@ -363,13 +363,13 @@ function Products() {
                     {/* Image Container */}
                     <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
                       <img
-                        src={getImageUrl(product.image)}
+                        src={getImageUrl(product.image, product.name)}
                         alt={product.name}
                         loading="lazy"
                         decoding="async"
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80";
+                          e.target.src = getProductFallbackImage(product.name);
                         }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -494,11 +494,11 @@ function Products() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center border-b border-slate-100 pb-6">
               <div className="aspect-square rounded-2xl bg-slate-100 overflow-hidden border border-slate-200 relative">
                 <img
-                  src={getImageUrl(quickViewProduct.image)}
+                  src={getImageUrl(quickViewProduct.image, quickViewProduct.name)}
                   alt={quickViewProduct.name}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80";
+                    e.target.src = getProductFallbackImage(quickViewProduct.name);
                   }}
                   className="w-full h-full object-cover"
                 />
