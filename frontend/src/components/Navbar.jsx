@@ -19,7 +19,16 @@ function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 text-slate-900 shadow-sm transition-all">
+    <>
+      {/* Top Vibrant Announcement Ticker */}
+      <div className="bg-gradient-to-r from-violet-600 via-indigo-600 to-amber-500 text-white text-[11px] sm:text-xs font-bold py-2 px-4 text-center tracking-wide flex items-center justify-center gap-2 shadow-sm animate-gradientShift">
+        <span className="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] uppercase font-black tracking-widest flex-shrink-0">
+          ✨ Special Offer
+        </span>
+        <span className="truncate">Get 10% OFF on your first order! Use code <strong className="underline decoration-amber-300 font-black">WELCOME10</strong> &bull; 🚚 Free Express Shipping</span>
+      </div>
+
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 text-slate-900 shadow-sm transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         
         {/* Brand Logo */}
@@ -256,7 +265,8 @@ function Navbar() {
           </div>
         </div>
       )}
-    </nav>
+      </nav>
+    </>
   );
 }
 
