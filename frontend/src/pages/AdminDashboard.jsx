@@ -440,7 +440,7 @@ function AdminDashboard() {
                 {orders.slice(0, 5).map((o) => (
                   <div key={o.id} className="py-3 flex items-center justify-between text-xs">
                     <div>
-                      <p className="font-bold text-slate-900">Order #{o.id}</p>
+                      <p className="font-bold text-slate-900">Order #{o.id} &bull; <span className="text-indigo-600 font-extrabold">{o.username || o.customer_email || 'Customer'}</span></p>
                       <p className="text-[10px] text-slate-500">{o.created_at ? new Date(o.created_at).toLocaleDateString() : 'Recent'}</p>
                     </div>
                     <span className="font-extrabold text-slate-900">₹{parseFloat(o.total_amount || 0).toFixed(2)}</span>
@@ -692,7 +692,7 @@ function AdminDashboard() {
                           #{order.id}
                         </td>
                         <td className="px-6 py-4 font-bold text-slate-800">
-                          {order.user?.username || order.user?.email || order.user || 'Customer'}
+                          {order.username || order.customer_email || order.user?.username || order.user?.email || 'Customer'}
                         </td>
                         <td className="px-6 py-4 font-extrabold text-slate-900">
                           ₹{parseFloat(order.total_amount || 0).toFixed(2)}
@@ -756,7 +756,7 @@ function AdminDashboard() {
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 mt-1">
-                        Customer: <span className="font-bold text-slate-800">{order.user?.username || order.user?.email || order.user || 'Customer'}</span>
+                        Customer: <span className="font-bold text-slate-800">{order.username || order.customer_email || order.user?.username || order.user?.email || 'Customer'}</span>
                       </p>
                     </div>
 

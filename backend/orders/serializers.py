@@ -30,6 +30,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="user.username", read_only=True, default="")
+    customer_email = serializers.CharField(source="user.email", read_only=True, default="")
 
     items = OrderItemSerializer(
         many=True,
@@ -40,6 +42,9 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             "id",
+            "user",
+            "username",
+            "customer_email",
             "total_amount",
             "status",
             "cancel_reason",
