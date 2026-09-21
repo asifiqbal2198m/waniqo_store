@@ -191,6 +191,12 @@ function Orders() {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <Link
+                      to="/products"
+                      className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold rounded-xl border border-amber-200 transition-colors flex items-center gap-1"
+                    >
+                      <span>★ Rate & Review</span>
+                    </Link>
                     {order.status?.toLowerCase() === 'delivered' && (
                       <Link
                         to={`/orders/${order.id}`}

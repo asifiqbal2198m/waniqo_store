@@ -15,6 +15,7 @@ function Products() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPriceBracket, setSelectedPriceBracket] = useState("all"); // 'all', 'under1k', '1k-5k', '5k-25k', 'above25k'
   const [sortBy, setSortBy] = useState("newest");
+  const [minRating, setMinRating] = useState(0);
   const [toastMessage, setToastMessage] = useState("");
 
   // Wishlist State
@@ -197,8 +198,9 @@ function Products() {
         catName.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesPrice = matchesPriceBracket(priceNum);
+      const matchesRating = minRating === 0 || (product.average_rating || 5) >= minRating;
 
-      return matchesCategory && matchesSearch && matchesPrice;
+      return matchesCategory && matchesSearch && matchesPrice && matchesRating;
     })
     .sort((a, b) => {
       if (sortBy === "price-low") return parseFloat(a.price) - parseFloat(b.price);
@@ -284,28 +286,52 @@ function Products() {
           </div>
         )}
 
-        {/* Price Bracket Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider pr-2">Price Filter:</span>
-          {[
-            { id: 'all', label: 'All Prices' },
-            { id: 'under1k', label: 'Under ₹1,000' },
-            { id: '1k-5k', label: '₹1,000 - ₹5,000' },
-            { id: '5k-25k', label: '₹5,000 - ₹25,000' },
-            { id: 'above25k', label: 'Above ₹25,000' },
-          ].map((b) => (
-            <button
-              key={b.id}
-              onClick={() => setSelectedPriceBracket(b.id)}
-              className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap ${
-                selectedPriceBracket === b.id
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
-              }`}
-            >
-              {b.label}
-            </button>
-          ))}
+        {/* Price & Rating Filter Pills */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-slate-100">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider pr-1">Price:</span>
+            {[
+              { id: 'all', label: 'All Prices' },
+              { id: 'under1k', label: 'Under ₹1,000' },
+              { id: '1k-5k', label: '₹1,000 - ₹5k' },
+              { id: '5k-25k', label: '₹5k - ₹25k' },
+              { id: 'above25k', label: 'Above ₹25k' },
+            ].map((b) => (
+              <button
+                key={b.id}
+                onClick={() => setSelectedPriceBracket(b.id)}
+                className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap ${
+                  selectedPriceBracket === b.id
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                }`}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider pr-1">Rating:</span>
+            {[
+              { r: 0, label: 'All Ratings' },
+              { r: 4.5, label: '★ 4.5+' },
+              { r: 4.0, label: '★ 4.0+' },
+              { r: 3.0, label: '★ 3.0+' },
+            ].map((star) => (
+              <button
+                key={star.r}
+                onClick={() => setMinRating(star.r)}
+                className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1 ${
+                  minRating === star.r
+                    ? 'bg-amber-400 text-slate-950 font-extrabold shadow-sm'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                }`}
+              >
+                <span>{star.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -626,11 +652,34 @@ function Products() {
 
             {/* CUSTOMER REVIEWS & RATINGS SECTION */}
             <div className="space-y-6 pt-2">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-lg font-extrabold text-slate-900">
-                  Customer Reviews & Ratings ⭐ ({quickViewProduct.reviews?.length || 0})
-                </h3>
-              </div>
+              {/* Rating Distribution Breakdown Bars */}
+              {quickViewProduct.reviews && quickViewProduct.reviews.length > 0 && (
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                  <div className="text-center sm:border-r border-slate-200 pr-2 space-y-1">
+                    <p className="text-3xl font-extrabold text-slate-900">{quickViewProduct.average_rating || 5.0}</p>
+                    <div className="flex justify-center text-amber-400 text-sm">
+                      {"★".repeat(Math.round(quickViewProduct.average_rating || 5))}
+                      {"☆".repeat(5 - Math.round(quickViewProduct.average_rating || 5))}
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-bold">Based on {quickViewProduct.reviews.length} customer reviews</p>
+                  </div>
+                  <div className="sm:col-span-2 space-y-1.5">
+                    {[5, 4, 3, 2, 1].map((stars) => {
+                      const count = quickViewProduct.reviews.filter(r => r.rating === stars).length;
+                      const pct = Math.round((count / quickViewProduct.reviews.length) * 100);
+                      return (
+                        <div key={stars} className="flex items-center gap-2 text-xs">
+                          <span className="w-6 text-right font-bold text-slate-600 text-[11px]">{stars}★</span>
+                          <div className="flex-1 bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div className="bg-amber-400 h-full rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="w-8 text-[10px] font-mono text-slate-500">{pct}%</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Review Success / Error Alert */}
               {reviewSuccessMsg && (
