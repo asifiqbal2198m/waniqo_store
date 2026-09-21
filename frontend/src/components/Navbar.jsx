@@ -38,11 +38,11 @@ function Navbar() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
           </div>
-          <div className="hidden lg:block">
-            <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-700 bg-clip-text text-transparent">
+          <div className="flex flex-col justify-center">
+            <span className="text-base sm:text-xl font-black tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-700 bg-clip-text text-transparent leading-tight">
               Waniqo Store
             </span>
-            <span className="text-[10px] block text-indigo-600 font-bold tracking-widest uppercase -mt-0.5">
+            <span className="text-[9px] sm:text-[10px] block text-indigo-600 font-black tracking-widest uppercase -mt-0.5">
               Friendly Shopping
             </span>
           </div>
